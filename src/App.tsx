@@ -1,5 +1,11 @@
+
+import Layout from "./three/Layout"
+import {ThreeProvider} from "./three";
+
 const App = () => {
-  return <>hello React Vite</>;
+  return <ThreeProvider>
+    <Layout/>
+  </ThreeProvider>;
 };
 
 export default App;
