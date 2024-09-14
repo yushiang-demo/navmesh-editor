@@ -2,8 +2,6 @@ import * as THREE from "three";
 import { init } from "recast-navigation";
 import { threeToSoloNavMesh, NavMeshHelper } from "recast-navigation/three";
 
-await init();
-
 type Vector3Pair = [number[], number[]];
 
 class Walls extends THREE.BufferGeometry {
@@ -167,12 +165,14 @@ const Layout = () => {
     ]);
     geometry.setFloor(20, 20);
 
-    const { navMesh } = threeToSoloNavMesh([new THREE.Mesh(geometry)]);
-    let navMeshHelper = null;
-    if (navMesh) {
-      navMeshHelper = new NavMeshHelper({ navMesh });
-      scene.add(navMeshHelper);
-    }
+    let navMeshHelper: NavMeshHelper;
+    init().then(() => {
+      const { navMesh } = threeToSoloNavMesh([new THREE.Mesh(geometry)]);
+      if (navMesh) {
+        navMeshHelper = new NavMeshHelper({ navMesh });
+        scene.add(navMeshHelper);
+      }
+    });
 
     return () => {
       if (navMeshHelper) {
