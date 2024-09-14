@@ -13,9 +13,11 @@
     "build:app": "tsc -b && vite build"
   },
   "dependencies": {
+    "@recast-navigation/three": "^0.34.0",
     "@types/three": "^0.168.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "recast-navigation": "^0.34.0",
     "three": "^0.168.0"
   },
   "devDependencies": {

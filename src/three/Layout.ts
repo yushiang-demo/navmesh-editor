@@ -1,4 +1,8 @@
 import * as THREE from "three";
+import { init } from "recast-navigation";
+import { threeToSoloNavMesh, NavMeshHelper } from "recast-navigation/three";
+
+await init();
 
 type Vector3Pair = [number[], number[]];
 
@@ -162,6 +166,19 @@ const Layout = () => {
       ],
     ]);
     geometry.setFloor(20, 20);
+
+    const { navMesh } = threeToSoloNavMesh([new THREE.Mesh(geometry)]);
+    let navMeshHelper = null;
+    if (navMesh) {
+      navMeshHelper = new NavMeshHelper({ navMesh });
+      scene.add(navMeshHelper);
+    }
+
+    return () => {
+      if (navMeshHelper) {
+        scene.remove(navMeshHelper);
+      }
+    };
   }, [geometry]);
 
   return null;

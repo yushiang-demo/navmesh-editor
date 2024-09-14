@@ -558,6 +558,34 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
+"@recast-navigation/core@0.34.0":
+  version "0.34.0"
+  resolved "https://registry.yarnpkg.com/@recast-navigation/core/-/core-0.34.0.tgz#31739455870948a2b66f2ac91b340eb2b8d9523a"
+  integrity sha512-aJRDmwCSgBgGnnL4pWi2ya/U0NwDJWJrPQnX0a5WG3fVRnL+fkgUfVCVaNAqb0ouLFQVSARqV0QalYtv2kyClw==
+  dependencies:
+    "@recast-navigation/wasm" "0.34.0"
+
+"@recast-navigation/generators@0.34.0":
+  version "0.34.0"
+  resolved "https://registry.yarnpkg.com/@recast-navigation/generators/-/generators-0.34.0.tgz#5de2148bc521ac6aae8b1ed14a8e3760dfbd2d6b"
+  integrity sha512-DSXZEIw5mlTjHXOKKymo3UMgoEtHz4DgAircw0dF0m0b8RRoA7KnIZ/OXBtT2JwuJqllclCiD9iI6gRmHHjgew==
+  dependencies:
+    "@recast-navigation/core" "0.34.0"
+    "@recast-navigation/wasm" "0.34.0"
+
+"@recast-navigation/three@0.34.0", "@recast-navigation/three@^0.34.0":
+  version "0.34.0"
+  resolved "https://registry.yarnpkg.com/@recast-navigation/three/-/three-0.34.0.tgz#591063bd0b0d4e2d000419ff1f89539bb54ad90d"
+  integrity sha512-JQRiMSUk2Ex9gsOVBfPz49nlaTzlv2HU7QQm1N3/YpPkN/t8SRzj4bDDozhL5rCqtWnbgFZtmM2rLr/c3E3AKA==
+  dependencies:
+    "@recast-navigation/core" "0.34.0"
+    "@recast-navigation/generators" "0.34.0"
+
+"@recast-navigation/wasm@0.34.0":
+  version "0.34.0"
+  resolved "https://registry.yarnpkg.com/@recast-navigation/wasm/-/wasm-0.34.0.tgz#e8d15ff6457569180b52a92818005d9d97cb5419"
+  integrity sha512-O14c01YYV/zp4nDQ6L71W3ljfasH8L5xgxpSdqSEs3XkhKyePZz5bng9K7DALHSOZVVXnqdWYazRT1GQ1fQrfw==
+
 "@rollup/pluginutils@^5.0.2":
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/@rollup/pluginutils/-/pluginutils-5.1.0.tgz#7e53eddc8c7f483a4ad0b94afb1f7f5fd3c771e0"
@@ -3684,6 +3712,15 @@ react-is@^17.0.1:
   integrity sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ==
   dependencies:
     loose-envify "^1.1.0"
+
+recast-navigation@^0.34.0:
+  version "0.34.0"
+  resolved "https://registry.yarnpkg.com/recast-navigation/-/recast-navigation-0.34.0.tgz#0d7de2a7a4527e6c7897055d30f6f41ab8d78cd0"
+  integrity sha512-b0bBOk6SaT+PmtkPNV9UxMHwt81DzhdL1X5dwWv7KSt93xajCPsaWikVuiX7DlIGi7GZ0jXaTFR2G6y+xbR8TQ==
+  dependencies:
+    "@recast-navigation/core" "0.34.0"
+    "@recast-navigation/generators" "0.34.0"
+    "@recast-navigation/three" "0.34.0"
 
 recast@^0.23.5:
   version "0.23.9"
