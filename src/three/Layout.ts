@@ -4,8 +4,9 @@ import { threeToSoloNavMesh, NavMeshHelper } from "recast-navigation/three";
 
 type Vector3Pair = [number[], number[]];
 
+const PLANE_THICKNESS = 0.4;
+
 class Walls extends THREE.BufferGeometry {
-  private PLANE_THICKNESS: number = 0.5;
   private planeArray: Vector3Pair[] = [];
   private floorVertices: number[] = [];
 
@@ -30,11 +31,7 @@ class Walls extends THREE.BufferGeometry {
       ).length();
       const height = max[1] - min[1];
 
-      const boxGeometry = new THREE.BoxGeometry(
-        this.PLANE_THICKNESS,
-        height,
-        depth
-      );
+      const boxGeometry = new THREE.BoxGeometry(PLANE_THICKNESS, height, depth);
       boxGeometry.applyQuaternion(quaternion);
       boxGeometry.translate(
         (max[0] + min[0]) / 2,
@@ -63,13 +60,7 @@ class Walls extends THREE.BufferGeometry {
   }
 
   public setFloor(width: number, length: number) {
-    this.floorVertices = [
-      [1, 0, 1],
-      [-1, 0, 1],
-      [1, 0, -1],
-      [1, 0, -1],
-      [-1, 0, 1],
-      [-1, 0, -1],
+    const floor = [
       [1, 0, 1],
       [1, 0, -1],
       [-1, 0, 1],
@@ -77,6 +68,7 @@ class Walls extends THREE.BufferGeometry {
       [-1, 0, -1],
       [-1, 0, 1],
     ].flatMap(([x, y, z]) => [(x * width) / 2, y, (z * length) / 2]);
+    this.floorVertices = floor;
     this._updateGeometry();
   }
 
@@ -167,7 +159,11 @@ const Layout = () => {
 
     let navMeshHelper: NavMeshHelper;
     init().then(() => {
-      const { navMesh } = threeToSoloNavMesh([new THREE.Mesh(geometry)]);
+      const { navMesh } = threeToSoloNavMesh([new THREE.Mesh(geometry)], {
+        ch: 1e-2,
+        cs: PLANE_THICKNESS + 1e-2,
+        walkableHeight: 1,
+      });
       if (navMesh) {
         navMeshHelper = new NavMeshHelper({ navMesh });
         scene.add(navMeshHelper);
