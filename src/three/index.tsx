@@ -32,7 +32,7 @@ const ThreeProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
     mountRef.current.appendChild(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
-    camera.position.set(0, 20, 100);
+    camera.position.set(0, 20, 20);
     controls.update();
 
     const light = new THREE.HemisphereLight(0xffffff, 0x0bbbbbb, 1);
