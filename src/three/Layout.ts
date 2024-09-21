@@ -1,181 +1,97 @@
 import * as THREE from "three";
-import { init } from "recast-navigation";
-import { threeToSoloNavMesh, NavMeshHelper } from "recast-navigation/three";
+import { useThree } from ".";
+import { useEffect } from "react";
+import useWebGLRenderTarget from "./useWebGLRenderTarget";
 
-type Vector3Pair = [number[], number[]];
+interface LayoutProps {
+  geometry: THREE.BufferGeometry;
+  wallHeight: number;
+  width: number;
+  length: number;
+}
 
-const PLANE_THICKNESS = 0.4;
+const vertexShader = `
+varying vec3 vPos;
 
-class Walls extends THREE.BufferGeometry {
-  private planeArray: Vector3Pair[] = [];
-  private floorVertices: number[] = [];
+void main() {
+  vPos = position;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+`;
 
-  constructor() {
-    super();
+const fragmentShader = `
+uniform sampler2D map;
+varying vec3 vPos;
+
+void main() {
+  vec2 vUv = vec2(vPos.x / 20.0 + 0.5, -vPos.z / 20.0 + 0.5);
+  float texelSize = 1.0 / 512.0;
+
+  float center = texture2D(map, vUv).r;
+  float left = texture2D(map, vUv + vec2(-texelSize, 0.0)).r;
+  float right = texture2D(map, vUv + vec2(texelSize, 0.0)).r;
+  float top = texture2D(map, vUv + vec2(0.0, texelSize)).r;
+  float bottom = texture2D(map, vUv + vec2(0.0, -texelSize)).r;
+
+  bool isEdge = (center > 0.0) && (abs(center - left) + abs(center - right) + abs(center - top) + abs(center - bottom) > 0.0);
+
+  vec3 color = vec3(1.0);
+
+  if (isEdge) {
+    color = vec3(0.8);
   }
 
-  private _updateGeometry(): void {
-    const planeVertices = this.planeArray.flatMap(([min, max]) => {
-      const rotationMat = new THREE.Matrix4().lookAt(
-        new THREE.Vector3(min[0], 0, min[2]),
-        new THREE.Vector3(max[0], 0, max[2]),
-        new THREE.Vector3(0, 1, 0)
-      );
-      const quaternion = new THREE.Quaternion().setFromRotationMatrix(
-        rotationMat
-      );
+  gl_FragColor = vec4(color, 1.0);
+}
+`;
 
-      const depth = new THREE.Vector2(
-        max[0] - min[0],
-        max[2] - min[2]
-      ).length();
-      const height = max[1] - min[1];
-
-      const boxGeometry = new THREE.BoxGeometry(PLANE_THICKNESS, height, depth);
-      boxGeometry.applyQuaternion(quaternion);
-      boxGeometry.translate(
-        (max[0] + min[0]) / 2,
-        (max[1] + min[1]) / 2,
-        (max[2] + min[2]) / 2
-      );
-
-      const vertices = [...boxGeometry.attributes.position.array];
-      const index = [...(boxGeometry.getIndex()?.array || [])];
-      const data = index.flatMap((index) => [
-        vertices[index * 3],
-        vertices[index * 3 + 1],
-        vertices[index * 3 + 2],
-      ]);
-      return data;
+class OutlineMaterial extends THREE.ShaderMaterial {
+  constructor(map: THREE.Texture) {
+    super({
+      uniforms: {
+        map: { value: map },
+      },
+      vertexShader,
+      fragmentShader,
     });
-
-    this.setAttribute(
-      "position",
-      new THREE.BufferAttribute(
-        new Float32Array([...this.floorVertices.flat(), ...planeVertices]),
-        3
-      )
-    );
-    this.computeVertexNormals();
-  }
-
-  public setFloor(width: number, length: number) {
-    const floor = [
-      [1, 0, 1],
-      [1, 0, -1],
-      [-1, 0, 1],
-      [1, 0, -1],
-      [-1, 0, -1],
-      [-1, 0, 1],
-    ].flatMap(([x, y, z]) => [(x * width) / 2, y, (z * length) / 2]);
-    this.floorVertices = floor;
-    this._updateGeometry();
-  }
-
-  public setPlane(data: Vector3Pair[]): void {
-    if (!data) return;
-    this.planeArray = data;
-    this._updateGeometry();
   }
 }
 
-import { useThree } from ".";
-import { useEffect, useState } from "react";
-
-const Layout = () => {
+const Layout = ({ geometry, width, length, wallHeight }: LayoutProps) => {
   const { scene } = useThree();
-  const [geometry] = useState(new Walls());
+  const topView = useWebGLRenderTarget();
 
   useEffect(() => {
     if (!scene) return;
 
-    const material = new THREE.MeshPhongMaterial({ color: "white" });
+    const material = new OutlineMaterial(topView.texture);
     const mesh = new THREE.Mesh(geometry, material);
+    mesh.frustumCulled = false;
     scene.add(mesh);
+
+    requestAnimationFrame(() => {
+      const topViewSene = new THREE.Scene();
+      const topViewMaterial = new THREE.MeshBasicMaterial({ color: "white" });
+      const topViewMesh = new THREE.Mesh(geometry, topViewMaterial);
+      topViewMesh.frustumCulled = false;
+      topViewSene.add(topViewMesh);
+      const camera = new THREE.OrthographicCamera(
+        -width / 2,
+        width / 2,
+        length / 2,
+        -length / 2,
+        0,
+        wallHeight
+      );
+      camera.position.set(0, wallHeight + 1e-3, 0);
+      camera.lookAt(new THREE.Vector3());
+      topView.render(topViewSene, camera);
+    });
 
     return () => {
       scene.remove(mesh);
     };
   }, [scene, geometry]);
-
-  useEffect(() => {
-    if (!geometry) return;
-
-    geometry.setPlane([
-      [
-        [1, 0, -10],
-        [1, 1, 1.2],
-      ],
-      [
-        [-4.6, 0, 1.2],
-        [1.02, 1, 1.2],
-      ],
-      [
-        [-9.55, 0, 1.2],
-        [-7.1, 1, 1.2],
-      ],
-      [
-        [4, 0, -10],
-        [4, 1, -4],
-      ],
-      [
-        [4, 0, -0.6],
-        [4, 1, 0.55],
-      ],
-      [
-        [4.25, 0, 0.55],
-        [8.34, 1, 0.55],
-      ],
-      [
-        [-9.65, 0, 8.5],
-        [-6.8, 1, 8.5],
-      ],
-      [
-        [-3.75, 0, 8.5],
-        [2.5, 1, 8.5],
-      ],
-      [
-        [5.55, 0, 8.5],
-        [8.34, 1, 8.5],
-      ],
-      [
-        [-9.65, 0, -9.75],
-        [1.02, 1, -9.75],
-      ],
-      [
-        [4.25, 0, -9.75],
-        [8.34, 1, -9.75],
-      ],
-      [
-        [-9.75, 0, -10],
-        [-9.75, 1, 8.7],
-      ],
-      [
-        [8.5, 0, -10],
-        [8.5, 1, 8.7],
-      ],
-    ]);
-    geometry.setFloor(20, 20);
-
-    let navMeshHelper: NavMeshHelper;
-    init().then(() => {
-      const { navMesh } = threeToSoloNavMesh([new THREE.Mesh(geometry)], {
-        ch: 1e-2,
-        cs: PLANE_THICKNESS + 1e-2,
-        walkableHeight: 1,
-      });
-      if (navMesh) {
-        navMeshHelper = new NavMeshHelper({ navMesh });
-        scene.add(navMeshHelper);
-      }
-    });
-
-    return () => {
-      if (navMeshHelper) {
-        scene.remove(navMeshHelper);
-      }
-    };
-  }, [geometry]);
 
   return null;
 };

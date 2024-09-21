@@ -35,9 +35,6 @@ const ThreeProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
     camera.position.set(0, 20, 20);
     controls.update();
 
-    const light = new THREE.HemisphereLight(0xffffff, 0x0bbbbbb, 1);
-    scene.add(light);
-
     const handleResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
@@ -63,7 +60,14 @@ const ThreeProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
 
   return (
     <ThreeContext.Provider value={{ scene, camera, renderer }}>
-      <div ref={mountRef} style={{ width: "100vw", height: "100vh" }} />
+      <div
+        ref={mountRef}
+        style={{
+          width: "100vw",
+          height: "100vh",
+          background: "rgb(225 225 225)",
+        }}
+      />
       {children}
     </ThreeContext.Provider>
   );
