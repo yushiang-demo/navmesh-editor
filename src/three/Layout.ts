@@ -2,12 +2,12 @@ import * as THREE from "three";
 import { useThree } from ".";
 import { useEffect } from "react";
 import useWebGLRenderTarget from "./useWebGLRenderTarget";
+import { WallConfig, Walls } from "../data";
+import useLayoutGeometry from "./useLayoutGeometry";
 
 interface LayoutProps {
-  geometry: THREE.BufferGeometry;
-  wallHeight: number;
-  width: number;
-  length: number;
+  wallConfig: WallConfig;
+  walls: Walls;
 }
 
 const vertexShader = `
@@ -57,19 +57,23 @@ class OutlineMaterial extends THREE.ShaderMaterial {
   }
 }
 
-const Layout = ({ geometry, width, length, wallHeight }: LayoutProps) => {
+const Layout = ({ wallConfig, walls }: LayoutProps) => {
   const { scene } = useThree();
   const topView = useWebGLRenderTarget();
+  const geometry = useLayoutGeometry({
+    ...wallConfig,
+    walls,
+  });
 
   useEffect(() => {
     if (!scene) return;
-
     const material = new OutlineMaterial(topView.texture);
     const mesh = new THREE.Mesh(geometry, material);
     mesh.frustumCulled = false;
     scene.add(mesh);
 
     requestAnimationFrame(() => {
+      const { width, length, wallHeight } = wallConfig;
       const topViewSene = new THREE.Scene();
       const topViewMaterial = new THREE.MeshBasicMaterial({ color: "white" });
       const topViewMesh = new THREE.Mesh(geometry, topViewMaterial);
@@ -91,7 +95,7 @@ const Layout = ({ geometry, width, length, wallHeight }: LayoutProps) => {
     return () => {
       scene.remove(mesh);
     };
-  }, [scene, geometry]);
+  }, [scene, geometry, wallConfig, walls]);
 
   return null;
 };
