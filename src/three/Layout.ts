@@ -21,10 +21,11 @@ void main() {
 
 const fragmentShader = `
 uniform sampler2D map;
+uniform vec2 resolution;
 varying vec3 vPos;
 
 void main() {
-  vec2 vUv = vec2(vPos.x / 20.0 + 0.5, -vPos.z / 20.0 + 0.5);
+  vec2 vUv = vec2(vPos.x / resolution.x + 0.5, -vPos.z / resolution.y + 0.5);
   float texelSize = 1.0 / 512.0;
 
   float center = texture2D(map, vUv).r;
@@ -46,10 +47,13 @@ void main() {
 `;
 
 class OutlineMaterial extends THREE.ShaderMaterial {
-  constructor(map: THREE.Texture) {
+  constructor(map: THREE.Texture, worldSize: THREE.Vector2) {
     super({
       uniforms: {
         map: { value: map },
+        resolution: {
+          value: worldSize,
+        },
       },
       vertexShader,
       fragmentShader,
@@ -67,13 +71,16 @@ const Layout = ({ wallConfig, walls }: LayoutProps) => {
 
   useEffect(() => {
     if (!scene) return;
-    const material = new OutlineMaterial(topView.texture);
+    const { width, length, wallHeight } = wallConfig;
+    const material = new OutlineMaterial(
+      topView.texture,
+      new THREE.Vector2(width, length)
+    );
     const mesh = new THREE.Mesh(geometry, material);
     mesh.frustumCulled = false;
     scene.add(mesh);
 
     requestAnimationFrame(() => {
-      const { width, length, wallHeight } = wallConfig;
       const topViewSene = new THREE.Scene();
       const topViewMaterial = new THREE.MeshBasicMaterial({ color: "white" });
       const topViewMesh = new THREE.Mesh(geometry, topViewMaterial);
