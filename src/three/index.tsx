@@ -8,22 +8,30 @@ import React, {
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
-const ThreeContext = createContext({
-  scene: new THREE.Scene(),
-  camera: new THREE.PerspectiveCamera(
+const ThreeContext = (() => {
+  const scene = new THREE.Scene();
+  const renderer = new THREE.WebGLRenderer({ alpha: true });
+  const camera = new THREE.PerspectiveCamera(
     75,
     window.innerWidth / window.innerHeight,
     0.1,
     1000
-  ),
-  renderer: new THREE.WebGLRenderer({ alpha: true }),
-});
+  );
+  const controls = new OrbitControls(camera, renderer.domElement);
+
+  return createContext({
+    scene,
+    camera,
+    controls,
+    renderer,
+  });
+})();
 
 const useThree = () => useContext(ThreeContext);
 
 const ThreeProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
   const mountRef = useRef<HTMLDivElement>(null);
-  const { scene, camera, renderer } = useThree();
+  const { scene, camera, renderer, controls } = useThree();
 
   useEffect(() => {
     if (!mountRef.current) return;
@@ -31,7 +39,6 @@ const ThreeProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
     renderer.setSize(window.innerWidth, window.innerHeight);
     mountRef.current.appendChild(renderer.domElement);
 
-    const controls = new OrbitControls(camera, renderer.domElement);
     camera.position.set(0, 20, 20);
     controls.update();
 
@@ -59,7 +66,7 @@ const ThreeProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
   }, [scene, camera, renderer]);
 
   return (
-    <ThreeContext.Provider value={{ scene, camera, renderer }}>
+    <ThreeContext.Provider value={{ scene, camera, controls, renderer }}>
       <div
         ref={mountRef}
         style={{

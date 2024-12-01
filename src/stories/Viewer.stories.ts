@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import ThreeApp from "../ThreeApp";
+import Viewer from "../Viewer";
 import { wallConfig, walls } from "../data";
 
 const meta = {
-  title: "ThreeApp",
-  component: ThreeApp,
-} satisfies Meta<typeof ThreeApp>;
+  title: "Viewer",
+  component: Viewer,
+} satisfies Meta<typeof Viewer>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
