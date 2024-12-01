@@ -14,7 +14,10 @@ interface NavMeshProps {
 
 export const useNavMesh = ({ wallConfig, walls }: NavMeshProps) => {
   const [libReady, setLibReady] = useState(false);
-  const [navMesh, setNavMesh] = useState<NavMesh | undefined>();
+  const [navMesh, setNavMesh] = useState<{
+    navMeshHelper?: NavMeshHelper;
+    navMesh?: NavMesh;
+  }>({});
   const geometry = useLayoutGeometry({
     ...wallConfig,
     walls,
@@ -30,12 +33,14 @@ export const useNavMesh = ({ wallConfig, walls }: NavMeshProps) => {
 
     const { wallThickness } = wallConfig;
     const { navMesh } = threeToSoloNavMesh([new THREE.Mesh(geometry)], {
-      ch: 1e-2,
+      ch: 1e-1,
       cs: wallThickness + 1e-2,
       walkableHeight: 1,
     });
     if (navMesh) {
-      setNavMesh(navMesh);
+      const navMeshHelper = new NavMeshHelper({ navMesh });
+
+      setNavMesh({ navMesh, navMeshHelper });
     }
     return () => {
       navMesh?.destroy();
@@ -47,18 +52,17 @@ export const useNavMesh = ({ wallConfig, walls }: NavMeshProps) => {
 
 const NavMeshRenderer = ({ wallConfig, walls }: NavMeshProps) => {
   const { scene } = useThree();
-  const navMesh = useNavMesh({ wallConfig, walls });
+  const { navMeshHelper } = useNavMesh({ wallConfig, walls });
 
   useEffect(() => {
-    if (!navMesh) return;
+    if (!navMeshHelper) return;
 
-    const navMeshHelper = new NavMeshHelper({ navMesh });
     scene.add(navMeshHelper);
 
     return () => {
       scene.remove(navMeshHelper);
     };
-  }, [navMesh]);
+  }, [navMeshHelper]);
 
   return null;
 };
