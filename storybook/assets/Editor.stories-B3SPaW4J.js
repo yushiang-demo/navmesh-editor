@@ -1,0 +1,3 @@
+import{j as o}from"./jsx-runtime-DEdD30eg.js";import{u as m,P as p,M as u,a as l,T as _}from"./index-ou0x27U9.js";import{r as f}from"./index-RYns6xqu.js";const g=({})=>{const{scene:r}=m();return f.useEffect(()=>{if(!r)return;const d=new p(1,1),i=new u,t=new l(d,i);return r.add(t),()=>{r.remove(t)}},[r]),null},s=({})=>o.jsx(_,{children:o.jsx(g,{})});try{s.displayName="Editor",s.__docgenInfo={description:"",displayName:"Editor",props:{}}}catch{}const x={title:"Editor",component:s},e={args:{}};var a,n,c;e.parameters={...e.parameters,docs:{...(a=e.parameters)==null?void 0:a.docs,source:{originalSource:`{
+  args: {}
+}`,...(c=(n=e.parameters)==null?void 0:n.docs)==null?void 0:c.source}}};const P=["Playground"];export{e as Playground,P as __namedExportsOrder,x as default};
